@@ -25,5 +25,57 @@ export class UserService{
         const [user] = await this.db.select().from(users).where(eq(users.email, email)).limit(1)
         return user;
     }
+    async findByGoogleId(googleId:string):Promise<User | undefined>{
+        const [user] = await this.db.select().from(users).where(eq(users.googleId, googleId)).limit(1)
+        return user;
+    }
+    async findByGithubId(githubId:string):Promise<User | undefined>{
+        const [user] = await this.db.select().from(users).where(eq(users.githubId, githubId)).limit(1)
+        return user;
+    }
+
+    async createWithPassword(data:{
+        name:string;
+        email:string;
+        passwordHash:string,   
+    }):Promise<User>{
+        const [user] = await this.db.insert(users).values({name:data.name, email:data.email, passwordHash:data.passwordHash}).returning();
+        return user;
+    }
+
+    async createOAthUser (data:{
+        name:string;
+        email:string;
+        avatarUrl?:string;
+        googleId?:string;
+        githubId:string;
+    }):Promise<User>{
+        const [user] = await this.db.insert(users).values({
+            name:data.name,
+            email:data.email,
+            avatarUrl:data.avatarUrl,
+            googleId:data.googleId,
+            githubId:data.githubId
+        }).returning();
+
+        return user;
+    }
+
+    async linkGoogleId (userId:string, googleId:string):Promise<void>{
+        await this.db.update(users).set({googleId, updatedAt:new Date()}).where(eq(users.id, userId));
+    }
+    async linkGithubId (userId:string, githubId:string):Promise<void>{
+        await this.db.update(users).set({githubId, updatedAt:new Date()}).where(eq(users.id, userId));
+    }
+
+    async updateRefreshTokenHash(userId:string, refreshTokenHash:string):Promise<void>{
+        await this.db.update(users).set({refreshTokenHash, updatedAt:new Date()}).where(eq(users.id, userId))
+    }
+
+    async clearRefreshTokenHash(userId:string):Promise<void>{
+        await this.db.update(users).set({refreshTokenHash:null, updatedAt:new Date()}).where(eq(users.id, userId));
+    }
+
+    
 }
 
