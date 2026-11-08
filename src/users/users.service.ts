@@ -249,6 +249,7 @@ export class UserService {
       githubId: user.githubId,
 
       avatarUrl: user.avatarUrl,
+      emailVerifiedAt: user.emailVerifiedAt,
 
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
